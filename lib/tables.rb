@@ -2,6 +2,7 @@ require 'airrecord'
 require 'configatron'
 require 'yaml'
 require_relative '../config/config.rb'
+require_relative 'mediagrabber.rb'
 
 Airrecord.api_key = configatron.airtable_api_key
 
@@ -38,29 +39,39 @@ end
 class Airtable
   Users_File = 'config/airtable_users.yml'
   Valid_Email = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
-  SCORES = []
-  
+  #SCORES = ["Meh","OK","Great", "Must See"]
+  SCORES = {MediaGrabber::TV => ["Crap","Filet O Fish","Decent","Must Watch"],
+            MediaGrabber::MOVIE => ["Crap","Filet O Fish","Decent Flick","Must Watch"],
+            MediaGrabber::VG => ["Crap","Fun Time-Waster", "Decent", "Must Play"]}
+    
   def initialize()
     @users = YAML::load_file(Users_File) #Load
     
   end
   
-  def add(title,url,user_id,score,review)
+  def add(item,user_id,score,review)
     email = @users[user_id]
     raise "Can't find your email for Airtable" unless email
-    show = TVShow.make({"title"=>title,
-                        "url"=>url})
+    show = TVShow.make({"title"=>item.title,
+                        "url"=>item.url,
+                        "blurb"=>item.blurb,
+                       "attachment"=>[{"url"=>item.image_block.call}]})
     review = Review.new( "Review" => review,
-                         "Score" => score,
+                         "Score" => get_rating(score),
                          "TV Shows" => show,
                          "author" => {"email" => email})
     review.create
   end
 
+
   def add_user(id,email)
     raise "Email imporperly formatted" unless Valid_Email.match(email)
     @users[id] = email
     File.open(Users_File, 'w') {|f| f.write @users.to_yaml } #Store
+  end
+
+  def get_rating(score)
+    SCORES[score-1]
   end
 end
 

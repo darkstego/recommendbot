@@ -30,7 +30,7 @@ def parse_add_media(event,text)
   raise RecommendBotError('Syntax incorrect Use TYPE "title" score "review" ',:add_match_fail) unless m
   type,title,score,review = m.captures
   
-  case(type.upcase)
+  case(type.downcase.to_sym)
   when *MediaGrabber::MEDIA_TYPES
     type = type.downcase.to_sym
   else
@@ -52,7 +52,7 @@ def fetch_title_url(event,title,type)
 
   event.respond("Pick Number of Title you are looking for")
   event.respond(r.join("\n"))
-  event.channel.await(author: event.author,contains: /(\d+)/) do |e|
+  event.channel.await(author: event.author,contains: /^(\d+)/) do |e|
     n = e.message.text.match(/(\d+)/).captures.first.to_i 
     raise RecommendBotError.new("Invalid Number for selection",:media_select_fail) if ! n.between?(1,titles.size)
     e.respond titles[n-1].url
@@ -63,29 +63,34 @@ end
 
 def add_media(event,type,title,score,review)
   titles = @grabber.get_media_list(title,type)
+  raise "couldn't find the title you were looking for" unless titles
   if titles.size > 1
     r = titles.each_with_index.map {|media,index|(index+1).to_s + ") #{media.title}" }
-    event.respond("Pick Number of Title you are looking for")
+    event.respond("Pick Number of Title you are looking for, or 0 to cancel")
     event.respond(r.join("\n"))
-    event.channel.await(author: event.author,contains: /(\d+)/) do |e|
-      n = e.message.text.match(/(\d+)/).captures.first.to_i 
-      raise RecommendBotError.new("Invalid Number for selection",:media_select_fail) if ! n.between?(1,titles.size)
-      t = titles[n-1]
-      add_to_db(t.title,t.url,event.user,score,review)
-      e.respond t.url
+    event.channel.await(author: event.author,contains: /^(\d+)/) do |e|
+      n = e.message.text.match(/(\d+)/).captures.first.to_i
+      if n.zero?
+        e.respond "Cancelled"
+      elsif !n.between?(1,titles.size)
+        e.respond "Invalid Number for selection"
+      else
+        t = titles[n-1]
+        add_to_db(e,t,score,review)
+      end
     end
   else
     t = titles[0]
-    add_to_db(t.title,t.url,event.user,score,review)
-    e.respond t.title
+    add_to_db(event,t,score,review)
   end
 end
 
 # call to add info to Airtable 
-def add_to_db(title,url,user,score,review)
-  score = "Must See"
-  @db.add(title,url,user.id,score,review)
-  
+def add_to_db(event,item,score,review)
+  @db.add(item,event.user.id,score,review)
+  airtable_url = "https://airtable.com/tblSRHfpQ6SsPMMtz/viwKeZFthyl7jfRX7"
+  event.respond item.url
+  event.respond "**#{event.user.name}** rated this as **#{@db.get_rating(score)}**\n*#{review}*\n<#{airtable_url}>"
 end
 
 bot.pm do |event|
@@ -106,7 +111,7 @@ end
 reg = MediaGrabber::MEDIA_TYPES.collect {|x| x.to_s.upcase }.join("|")
 bot.message(start_with: /#{reg}/) do |event|
   begin
-    parse_add_media(event.message.text)
+    parse_add_media(event,event.message.text)
   rescue => error
     event.respond error.message
   end
