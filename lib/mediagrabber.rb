@@ -115,7 +115,7 @@ class MediaGrabber
     list = Tmdb::Movie.find(name)
     list = list.first(SEARCH_LIMIT)
     list.map do |x|
-      url = imdb_url_create(x.imdb_id)
+      url = imdb_url_create(Tmdb::Movie.detail(x.id)["imdb_id"])
       image = @poster_path + x.poster_path
       blurb = x.overview
       year = x.release_date.first 4

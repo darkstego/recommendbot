@@ -108,6 +108,7 @@ end
 
 
 
+# in: "#recommendations"
 reg = MediaGrabber::MEDIA_TYPES.collect {|x| x.to_s.upcase }.join("|")
 bot.message(start_with: /#{reg}/) do |event|
   begin
