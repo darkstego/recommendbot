@@ -56,7 +56,7 @@ class Airtable
                         "url"=>item.url,
                         "Blurb"=>item.blurb,
                         "Type of Medium" => MEDIA_NAMES[item.type],
-                       "Attachments"=>[{"url"=>item.image_block.call}]})
+                       "Attachments"=>[{"url"=>item.image}]})
     review = Review.new( "Review" => review,
                          "Rating" => get_rating(score),
                          "Media" => media,

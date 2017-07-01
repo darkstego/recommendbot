@@ -1,4 +1,3 @@
-require "imdb"
 require "themoviedb"
 require "configatron"
 require "giant_bomb_api"
@@ -6,13 +5,13 @@ require_relative '../config/config.rb'
 
 
 class MediaItem
-  attr_reader :type,:title,:url,:image_block,:blurb
+  attr_reader :type,:title,:url,:image,:blurb
 
-  def initialize(type,title,url,image_block,blurb="")
+  def initialize(type,title,url,image,blurb="")
     @type = type
     @title = title
     @url = url
-    @image_block = image_block
+    @image = image
     @blurb = blurb
   end
 end
@@ -57,6 +56,10 @@ class MediaGrabber
   
   private
 
+  def imdb_url_create(id)
+    "http://www.imdb.com/title/#{id.to_s}/"
+  end
+  
   def imdb_url_cleanup(url)
     url.sub!("akas","www").slice!("combined")
     url
@@ -90,34 +93,34 @@ class MediaGrabber
     results = GiantBombApi.client.send_request(search)
     list = results.results
     list.map do |x|
-      MediaItem.new(VG,x.name,x.site_detail_url,lambda {x.image.medium_url},x.deck)
+      MediaItem.new(VG,x.name,x.site_detail_url,x.image.medium_url,x.deck)
     end
 
   end
   
   def get_tv_list(name)
-    list = Imdb::Search.new(name).movies.select do |x|
-      x.title.include?("(TV Series)") and !x.title.include?("(TV Episode)")
-    end
+    list = Tmdb::TV.find(name)
     list = list.first(SEARCH_LIMIT)
     list.map do |x|
-      url = imdb_url_cleanup(x.url)
-      image_block = lambda {get_tmdb_poster(imdb_id(url),TV)}
-      blurb = x.plot_summary
-      MediaItem.new(TV,x.title,url,image_block,blurb)
+      url = imdb_url_create(Tmdb::TV.external_ids(x.id)["imdb_id"])
+      image = @poster_path + x.poster_path
+      blurb = x.overview
+      year = x.first_air_date.first 4
+      title = "#{x.name} (#{year})"
+      MediaItem.new(TV,title,url,image,blurb)
     end
   end
 
   def get_movie_list(name)
-    list = Imdb::Search.new(name).movies.select do |x|
-      !x.title.include?("(TV Series)") and !x.title.include?("(TV Episode)")
-    end
+    list = Tmdb::Movie.find(name)
     list = list.first(SEARCH_LIMIT)
     list.map do |x|
-      url = imdb_url_cleanup(x.url)
-      image_block = lambda {get_tmdb_poster(imdb_id(url),MOVIE)}
-      blurb = x.plot_summary
-      MediaItem.new(MOVIE,x.title,url,image_block,blurb)
+      url = imdb_url_create(x.imdb_id)
+      image = @poster_path + x.poster_path
+      blurb = x.overview
+      year = x.release_date.first 4
+      title = "#{x.title} (#{year})"
+      MediaItem.new(MOVIE,title,url,image,blurb)
     end
   end
 
