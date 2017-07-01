@@ -88,7 +88,7 @@ end
 # call to add info to Airtable 
 def add_to_db(event,item,score,review)
   @db.add(item,event.user.id,score,review)
-  airtable_url = "https://airtable.com/tblSRHfpQ6SsPMMtz/viwKeZFthyl7jfRX7"
+  airtable_url = "https://airtable.com/tblLqJXiizSuGdmlT/viwEvsUtWZBnrsetM"
   event.respond item.url
   event.respond "**#{event.user.name}** rated this as **#{@db.get_rating(score)}**\n*#{review}*\n<#{airtable_url}>"
 end
@@ -103,7 +103,7 @@ end
 bot.mention do |event|
   # The `pm` method is used to send a private message (also called a DM or direct message) to the user who sent the
   # initial message.
-  event.user.pm('You have mentioned me!' + event.user.name.to_s + " " + event.user.id.to_s)
+  event.user.pm('You have mentioned me!')
 end
 
 
