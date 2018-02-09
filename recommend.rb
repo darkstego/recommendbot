@@ -1,3 +1,4 @@
+# coding: utf-8
 # This is an advanced recommendation bot.... for recommendations
 
 require 'discordrb'
@@ -17,7 +18,7 @@ bot = Discordrb::Bot.new token: configatron.token, client_id: configatron.client
 def parse_command(s)
   
   m = s.match(/!rc (\w+)\s+(.*)/) 
-  raise RecommendBotError.new("Can't Parse Command",:command_parse_fail) unless m
+  raise "Can't Parse Command" unless m
   command,text = m.captures
   command = command.downcase.to_sym
   command ||= :unknown
@@ -27,17 +28,17 @@ end
 # TV "The Expanse" 5 "Great Show"
 def parse_add_media(event,text)
   m = text.match(/(\w+)\s+"(.*)"\s+(\d)+\s"(.*)"/)
-  raise RecommendBotError('Syntax incorrect Use TYPE "title" score "review" ',:add_match_fail) unless m
+  raise 'Syntax incorrect Use TYPE "title" score "review"' unless m
   type,title,score,review = m.captures
   
   case(type.downcase.to_sym)
   when *MediaGrabber::MEDIA_TYPES
     type = type.downcase.to_sym
   else
-    raise RecommendBotError.new("Invalid Media Type",:media_type_fail)
+    raise "Invalid Media Type"
   end
   score = score.to_i
-  raise RecommendBotError.new("Invalid Score",:media_score_fail) if score > 4 or score < 1
+  raise "Invalid Score" if score > 4 or score < 1
 
   
   add_media(event,type,title,score.to_i,review)
@@ -54,7 +55,7 @@ def fetch_title_url(event,title,type)
   event.respond(r.join("\n"))
   event.channel.await(author: event.author,contains: /^(\d+)/) do |e|
     n = e.message.text.match(/(\d+)/).captures.first.to_i 
-    raise RecommendBotError.new("Invalid Number for selection",:media_select_fail) if ! n.between?(1,titles.size)
+    raise "Invalid Number for selection" if ! n.between?(1,titles.size)
     e.respond titles[n-1].url
   end
   
@@ -65,7 +66,7 @@ def add_media(event,type,title,score,review)
   titles = @grabber.get_media_list(title,type)
   raise "couldn't find the title you were looking for" unless titles
   if titles.size > 1
-    r = titles.each_with_index.map {|media,index|(index+1).to_s + ") #{media.title}" }
+    r = titles.each_with_index.map {|media,index|(index+1).to_s + ") #{media.display ? media.display : media.title}" }
     event.respond("Pick Number of Title you are looking for, or 0 to cancel")
     event.respond(r.join("\n"))
     event.channel.await(author: event.author,contains: /^(\d+)/) do |e|
@@ -79,9 +80,11 @@ def add_media(event,type,title,score,review)
         add_to_db(e,t,score,review)
       end
     end
-  else
+  elsif titles.size == 1
     t = titles[0]
     add_to_db(event,t,score,review)
+  else
+    event.respond "Couldn't find any titles with that name 😾"
   end
 end
 
@@ -89,13 +92,18 @@ end
 def add_to_db(event,item,score,review)
   @db.add(item,event.user.id,score,review)
   airtable_url = "https://airtable.com/tblLqJXiizSuGdmlT/viwEvsUtWZBnrsetM"
-  event.respond item.url
+  event.respond item.url.to_s
   event.respond "**#{event.user.name}** rated this as **#{@db.get_rating(score)}**\n*#{review}*\n<#{airtable_url}>"
 end
 
 bot.pm do |event|
-  if Airtable::Valid_Email.match?(event.message.text)
-    @db.add_user(event.user.id,event.message.text)
+  begin
+    if Airtable::Valid_Email.match?(event.message.text)
+      @db.add_user(event.user.id,event.message.text)
+      event.respond "Added your email"
+    end
+  rescue => error
+    event.respond "Couldn't add your email"
   end
 end
 
@@ -110,9 +118,13 @@ end
 
 # in: "#recommendations"
 reg = MediaGrabber::MEDIA_TYPES.collect {|x| x.to_s.upcase }.join("|")
-bot.message(start_with: /#{reg}/) do |event|
+bot.message(start_with: /#{reg}/i, in: "#recommendations") do |event|
   begin
-    parse_add_media(event,event.message.text)
+    if @db.user_valid? event.user.id
+      parse_add_media(event,event.message.text)
+    else
+      event.respond "I don't have your airtable email. DM me your email"
+    end
   rescue => error
     event.respond error.message
   end

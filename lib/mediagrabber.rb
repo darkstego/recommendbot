@@ -1,29 +1,34 @@
 require "themoviedb"
 require "configatron"
 require "giant_bomb_api"
+require "myanimelist_client"
+require "googlebooks"
 require_relative '../config/config.rb'
 
 
 class MediaItem
-  attr_reader :type,:title,:url,:image,:blurb
+  attr_reader :type,:title,:url,:image,:blurb,:display
 
-  def initialize(type,title,url,image,blurb="")
+  def initialize(type,title,url,image,blurb="",display=nil)
     @type = type
     @title = title
     @url = url
     @image = image
     @blurb = blurb
+    @display = display
   end
 end
 
 class MediaGrabber
 
   SEARCH_LIMIT = 5
-  MEDIA_TYPES = [:tv,:mov,:vg]
+  MEDIA_TYPES = [:tv,:mov,:vg,:ani,:book]
   # SEARCHABLE TYPES
   TV = :tv
   MOVIE = :mov
   VG = :vg
+  ANI = :ani
+  BOOK = :book
 
   def initialize
     Tmdb::Api.key(configatron.tmdb.api_key)
@@ -32,6 +37,9 @@ class MediaGrabber
     GiantBombApi.configure do |config|
       config.api_key = configatron.giantbomb.api_key
     end
+    @anime_client = MyanimelistClient.new(configatron.anime.uname,
+                                          configatron.anime.pass)
+    
   end
 
   def get_media_list(name,type)
@@ -42,6 +50,10 @@ class MediaGrabber
              get_movie_list(name)
            when VG
              get_videogame_list(name)
+           when ANI
+             get_anime_list(name)
+           when BOOK
+             get_book_list(name)
            end
     return list
   end
@@ -74,6 +86,8 @@ class MediaGrabber
     end
   end
 
+  
+
   def get_tmdb_poster(id,type)
     mov = Tmdb::Find.imdb_id(id)
     raise "Couldn't find a tmbd entry with that imdb id" unless mov
@@ -84,9 +98,23 @@ class MediaGrabber
       prefix = "movie"
     end
     hash_id = prefix + "_results"
-    @poster_path + mov[hash_id].first["poster_path"]
+    @poster_path + mov[hash_id].first["poster_path"].to_s
   end
 
+  def get_book_list(name)
+    GoogleBooks.search(name).to_a.map do |x|
+       MediaItem.new(BOOK,x.title,x.info_link,
+                     x.image_link(:zoom => 2),
+                     x.description, x.title + " - " + x.authors)
+    end
+  end
+
+  def get_anime_list(name)
+    @anime_client.search_anime(name).first(5).to_a.map do |x|
+      MediaItem.new(ANI,x.title,"https://myanimelist.net/anime/#{x.id}/",
+                    x.image,x.synopsis)
+    end
+  end
 
   def get_videogame_list(name)
     search = GiantBombApi::Request::Search.new(name,resources: [GiantBombApi::Resource::Game], limit: SEARCH_LIMIT)
@@ -103,8 +131,8 @@ class MediaGrabber
     list = list.first(SEARCH_LIMIT)
     list.map do |x|
       url = imdb_url_create(Tmdb::TV.external_ids(x.id)["imdb_id"])
-      image = @poster_path + x.poster_path
-      blurb = x.overview
+      image = @poster_path + x.poster_path.to_s
+      blurb = x.overview.to_s
       year = x.first_air_date.first 4
       title = "#{x.name} (#{year})"
       MediaItem.new(TV,title,url,image,blurb)
@@ -116,10 +144,10 @@ class MediaGrabber
     list = list.first(SEARCH_LIMIT)
     list.map do |x|
       url = imdb_url_create(Tmdb::Movie.detail(x.id)["imdb_id"])
-      image = @poster_path + x.poster_path
+      image = @poster_path + x.poster_path.to_s
       blurb = x.overview
       year = x.release_date.first 4
-      title = "#{x.title} (#{year})"
+      title = "#{x.title.to_s} (#{year.to_s})"
       MediaItem.new(MOVIE,title,url,image,blurb)
     end
   end

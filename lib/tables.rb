@@ -42,7 +42,9 @@ class Airtable
   RATINGS = ["Crap","Filet O Fish","Decent", "Must Experience"]
   MEDIA_NAMES = {MediaGrabber::TV => "TV Show",
                  MediaGrabber::MOVIE => "Movie",
-                 MediaGrabber::VG => "Video Game"} 
+                 MediaGrabber::VG => "Video Game",
+                 MediaGrabber::ANI => "Anime",
+                 MediaGrabber::BOOK => "Book",} 
  
   def initialize()
     @users = YAML::load_file(Users_File) #Load
@@ -67,12 +69,16 @@ class Airtable
 
   def add_user(id,email)
     raise "Email imporperly formatted" unless Valid_Email.match(email)
-    @users[id] = email
+    @users[id] = email.downcase
     File.open(Users_File, 'w') {|f| f.write @users.to_yaml } #Store
   end
 
   def get_rating(score)
     RATINGS[score-1]
+  end
+
+  def user_valid?(id)
+    @users.has_key? id
   end
 end
 
