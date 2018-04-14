@@ -1,23 +1,25 @@
 # coding: utf-8
 # This is an advanced recommendation bot.... for recommendations
+$:.unshift File.expand_path("../lib", __FILE__)
+$:.unshift File.expand_path("../config", __FILE__)
 
-require 'discordrb'
-require 'configatron'
-require_relative 'config/config.rb'
-require_relative 'lib/mediagrabber.rb'
-require_relative 'lib/tables.rb'
-require_relative 'lib/recommendboterror.rb'
+
+require 'rubygems'
+require 'bundler/setup'
+require 'config'
+require 'mediagrabber'
+require 'tables'
+require 'recommendboterror'
 
 
 bot = Discordrb::Bot.new token: configatron.token, client_id: configatron.client_id
 
 @db = Airtable.new
 @grabber = MediaGrabber.new
-
+@announce_time = Time.now - (60*60)
 
 def parse_command(s)
-  
-  m = s.match(/!rc (\w+)\s+(.*)/) 
+  m = s.match(/!rc (\w+)\s+(.*)/)
   raise "Can't Parse Command" unless m
   command,text = m.captures
   command = command.downcase.to_sym
@@ -50,7 +52,6 @@ def fetch_title_url(event,title,type)
   titles = @grabber.get_media_list(title,type)
   return titles[0] if titles.size == 1
   r = titles.each_with_index.map {|media,index|(index+1).to_s + ") #{media.title}" }
-
   event.respond("Pick Number of Title you are looking for")
   event.respond(r.join("\n"))
   event.channel.await(author: event.author,contains: /^(\d+)/) do |e|
@@ -58,9 +59,8 @@ def fetch_title_url(event,title,type)
     raise "Invalid Number for selection" if ! n.between?(1,titles.size)
     e.respond titles[n-1].url
   end
-  
 end
-  
+
 
 def add_media(event,type,title,score,review)
   titles = @grabber.get_media_list(title,type)
@@ -93,7 +93,7 @@ def add_to_db(event,item,score,review)
   @db.add(item,event.user.id,score,review)
   airtable_url = "https://airtable.com/tblLqJXiizSuGdmlT/viwEvsUtWZBnrsetM"
   event.respond item.url.to_s
-  event.respond "**#{event.user.name}** rated this as **#{@db.get_rating(score)}**\n*#{review}*\n<#{airtable_url}>"
+  event.respond "**#{event.user.name}** *rated this as* **#{@db.get_rating(score)}**\n#{review}\n<#{airtable_url}>"
 end
 
 bot.pm do |event|
@@ -118,7 +118,7 @@ end
 
 # in: "#recommendations"
 reg = MediaGrabber::MEDIA_TYPES.collect {|x| x.to_s.upcase }.join("|")
-bot.message(start_with: /#{reg}/i, in: "#recommendations") do |event|
+bot.message(start_with: /(#{reg}) /i, in: "#recommendations") do |event|
   begin
     if @db.user_valid? event.user.id
       parse_add_media(event,event.message.text)
@@ -128,6 +128,15 @@ bot.message(start_with: /#{reg}/i, in: "#recommendations") do |event|
   rescue => error
     event.respond error.message
   end
+end
+
+bot.voice_state_update(channel: "#Dewaniya") do |event|
+	if event.channel.users.size >= 2 and
+			Time.now < @announce_time + (3*60) 
+		@announce_time = Time.now
+		channel = bot.find_channel("general").first
+		bot.send_message channel, "There is a party going on in Dewaniya! Hop on in"
+	end
 end
 
 

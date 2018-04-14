@@ -1,8 +1,6 @@
-require 'airrecord'
-require 'configatron'
 require 'yaml'
-require_relative '../config/config.rb'
-require_relative 'mediagrabber.rb'
+require 'config'
+require 'mediagrabber'
 
 Airrecord.api_key = configatron.airtable_api_key
 

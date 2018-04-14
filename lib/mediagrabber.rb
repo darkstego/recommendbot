@@ -3,7 +3,7 @@ require "configatron"
 require "giant_bomb_api"
 require "myanimelist_client"
 require "googlebooks"
-require_relative '../config/config.rb'
+require 'config'
 
 
 class MediaItem
