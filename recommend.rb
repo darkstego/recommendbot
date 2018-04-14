@@ -10,6 +10,7 @@ require 'config'
 require 'mediagrabber'
 require 'tables'
 require 'recommendboterror'
+require 'discordrb'
 
 
 bot = Discordrb::Bot.new token: configatron.token, client_id: configatron.client_id
@@ -130,9 +131,9 @@ bot.message(start_with: /(#{reg}) /i, in: "#recommendations") do |event|
   end
 end
 
-bot.voice_state_update(channel: "#Dewaniya") do |event|
+bot.voice_state_update(channel: "Dewaniya") do |event|
 	if event.channel.users.size >= 2 and
-			Time.now < @announce_time + (3*60) 
+			Time.now > @announce_time + (3*60) 
 		@announce_time = Time.now
 		channel = bot.find_channel("general").first
 		bot.send_message channel, "There is a party going on in Dewaniya! Hop on in"

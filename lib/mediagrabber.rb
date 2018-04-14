@@ -39,7 +39,6 @@ class MediaGrabber
     end
     @anime_client = MyanimelistClient.new(configatron.anime.uname,
                                           configatron.anime.pass)
-    
   end
 
   def get_media_list(name,type)
@@ -71,7 +70,7 @@ class MediaGrabber
   def imdb_url_create(id)
     "http://www.imdb.com/title/#{id.to_s}/"
   end
-  
+
   def imdb_url_cleanup(url)
     url.sub!("akas","www").slice!("combined")
     url
@@ -86,7 +85,7 @@ class MediaGrabber
     end
   end
 
-  
+
 
   def get_tmdb_poster(id,type)
     mov = Tmdb::Find.imdb_id(id)
@@ -125,7 +124,7 @@ class MediaGrabber
     end
 
   end
-  
+
   def get_tv_list(name)
     list = Tmdb::TV.find(name)
     list = list.first(SEARCH_LIMIT)

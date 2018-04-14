@@ -1,6 +1,7 @@
 require 'yaml'
 require 'config'
 require 'mediagrabber'
+require 'airrecord'
 
 Airrecord.api_key = configatron.airtable_api_key
 
