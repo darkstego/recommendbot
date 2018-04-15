@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+gem 'discordrb'
+gem 'configatron'
+gem 'airrecord'
+gem 'themoviedb'
+gem 'giant_bomb_api'
+gem 'myanimelist_client'
+gem 'googlebooks'
