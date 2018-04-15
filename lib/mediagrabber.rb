@@ -33,10 +33,8 @@ class MediaGrabber
   def initialize
     Tmdb::Api.key(configatron.tmdb.api_key)
     config = Tmdb::Configuration.new
-    @poster_path = config.base_url + config.poster_sizes[3]
-    GiantBombApi.configure do |config|
-      config.api_key = configatron.giantbomb.api_key
-    end
+	 @poster_path = config.base_url + config.poster_sizes[3]
+	 Luchadeer.configure api_key: configatron.giantbomb.api_key
     @anime_client = MyanimelistClient.new(configatron.anime.uname,
                                           configatron.anime.pass)
   end
@@ -116,13 +114,10 @@ class MediaGrabber
   end
 
   def get_videogame_list(name)
-    search = GiantBombApi::Request::Search.new(name,resources: [GiantBombApi::Resource::Game], limit: SEARCH_LIMIT)
-    results = GiantBombApi.client.send_request(search)
-    list = results.results
-    list.map do |x|
-      MediaItem.new(VG,x.name,x.site_detail_url,x.image.medium_url,x.deck)
-    end
-
+	  results = Luchadeer.search(query: name, resources: [Luchadeer::Game], limit: SEARCH_LIMIT)
+	  resutls.map do |x|
+		  MediaItem.new(VG,x.name,x.site_detail_url,x.image.medium_url,x.deck)
+	  end
   end
 
   def get_tv_list(name)
