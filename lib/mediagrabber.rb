@@ -1,6 +1,6 @@
 require "themoviedb"
 require "configatron"
-require "giant_bomb_api"
+require "luchadeer"
 require "myanimelist_client"
 require "googlebooks"
 require 'config'
