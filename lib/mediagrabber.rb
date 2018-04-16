@@ -116,7 +116,8 @@ class MediaGrabber
   def get_videogame_list(name)
 	  results = @vg_client.search_games name, {fields: "*", limit: SEARCH_LIMIT}
 	  results.map do |x|
-		  MediaItem.new(VG,x.name,x.url,"https:" + x.cover.url,x.summary)
+		  image = x.cover ? "https:" + x.cover.url : "http://via.placeholder.com/250x250"
+		  MediaItem.new(VG,x.name,x.url,image,x.summary)
 	  end
   end
 
