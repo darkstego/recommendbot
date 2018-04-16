@@ -34,7 +34,7 @@ class MediaGrabber
     Tmdb::Api.key(configatron.tmdb.api_key)
     config = Tmdb::Configuration.new
 	 @poster_path = config.base_url + config.poster_sizes[3]
-	 @vg_client = IGDB::Client.new configatron.giantbomb.api_key
+	 @vg_client = IGDB::Client.new configatron.igdb.api_key
     @anime_client = MyanimelistClient.new(configatron.anime.uname,
                                           configatron.anime.pass)
   end
