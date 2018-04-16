@@ -1,6 +1,6 @@
 require "themoviedb"
 require "configatron"
-require "luchadeer"
+require "igdb_client"
 require "myanimelist_client"
 require "googlebooks"
 require 'config'
@@ -34,7 +34,7 @@ class MediaGrabber
     Tmdb::Api.key(configatron.tmdb.api_key)
     config = Tmdb::Configuration.new
 	 @poster_path = config.base_url + config.poster_sizes[3]
-	 Luchadeer.configure api_key: configatron.giantbomb.api_key
+	 @vg_client = IGDB::Client.new configatron.giantbomb.api_key
     @anime_client = MyanimelistClient.new(configatron.anime.uname,
                                           configatron.anime.pass)
   end
@@ -114,9 +114,9 @@ class MediaGrabber
   end
 
   def get_videogame_list(name)
-	  results = Luchadeer.search(query: name, resources: [Luchadeer::Game], limit: SEARCH_LIMIT)
-	  resutls.map do |x|
-		  MediaItem.new(VG,x.name,x.site_detail_url,x.image.medium_url,x.deck)
+	  results = @vg_client.search_games name, {fields: "*", limit: SEARCH_LIMIT}
+	  results.map do |x|
+		  MediaItem.new(VG,x.name,x.url,"https:" + x.cover.url,x.summary)
 	  end
   end
 
