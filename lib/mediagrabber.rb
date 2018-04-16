@@ -117,6 +117,7 @@ class MediaGrabber
 	  results = @vg_client.search_games name, {fields: "*", limit: SEARCH_LIMIT}
 	  results.map do |x|
 		  image = x.cover ? "https:" + x.cover.url : "http://via.placeholder.com/250x250"
+		  image['t_thumb'] = 't_cover_big' if image['t_thumb']
 		  MediaItem.new(VG,x.name,x.url,image,x.summary)
 	  end
   end
