@@ -129,7 +129,7 @@ class MediaGrabber
       url = imdb_url_create(Tmdb::TV.external_ids(x.id)["imdb_id"])
       image = @poster_path + x.poster_path.to_s
       blurb = x.overview.to_s
-      year = x.first_air_date.first 4
+      year = x.first_air_date[0..3]
       title = "#{x.name} (#{year})"
       MediaItem.new(TV,title,url,image,blurb)
     end
