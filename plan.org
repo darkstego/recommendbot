@@ -1,0 +1,2 @@
+* move all features of bot into seperate classes
+** methods will be class methods with private class methods
