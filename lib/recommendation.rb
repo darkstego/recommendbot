@@ -7,14 +7,18 @@ require 'recommendboterror'
 class Recommendations
   VALID_EMAIL = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
 
-  def initialize(bot)
-    @db = Airtable.new
-    @grabber = MediaGrabber.new
-    bot.pm(contains: VALID_EMAIL) { |event| register_email(event)}
+  def initialize(bot,secrets)
+    @db = Airtable.new(secrets)
+    @grabber = MediaGrabber.new(secrets)
+    @bot = bot
+  end
+
+  def start()
+    @bot.pm(contains: VALID_EMAIL) { |event| register_email(event)}
 
     # in: "#recommendations"
     reg = MediaGrabber::MEDIA_TYPES.collect {|x| x.to_s.upcase }.join("|")
-    bot.message(start_with: /(#{reg}) /i, in: "#recommendations") do |event|
+    @bot.message(start_with: /(#{reg}) /i, in: "#recommendations") do |event|
       begin
         if @db.user_valid? event.user.id
           parse_add_media(event,event.message.text)
@@ -27,6 +31,7 @@ class Recommendations
     end
   end
 
+  private
   # TV "The Expanse" 5 "Great Show"
   def parse_add_media(event,text)
     m = text.match(/(\w+)\s+"(.*)"\s+(\d)+\s"(.*)"/)

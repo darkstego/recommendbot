@@ -1,13 +1,9 @@
 require 'yaml'
-require 'config'
 require 'mediagrabber'
 require 'airrecord'
 
-Airrecord.api_key = configatron.airtable_api_key
-
 
 class Media < Airrecord::Table
-  self.base_key = configatron.airtable_app_key
   self.table_name = "Media"
 
   has_many :review, class: 'Review', column: "Reviews"
@@ -26,7 +22,6 @@ class Media < Airrecord::Table
 end
 
 class Review < Airrecord::Table
-  self.base_key = configatron.airtable_app_key
   self.table_name = "Reviews"
 
   belongs_to :tvshow, class: 'Media', column: 'Media'
@@ -44,9 +39,11 @@ class Airtable
                  MediaGrabber::ANI => "Anime",
                  MediaGrabber::BOOK => "Book",} 
  
-  def initialize()
+  def initialize(secrets)
     @users = YAML::load_file(Users_File) #Load
-    
+    Airrecord.api_key = secrets[:airtable_api_key]
+    Media.base_key = secrets[:airtable_app_key]
+    Review.base_key = secrets[:airtable_app_key]
   end
   
   def add(item,user_id,score,review)

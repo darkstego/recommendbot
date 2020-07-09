@@ -1,9 +1,7 @@
 require "themoviedb"
-require "configatron"
 require "igdb_client"
 require "myanimelist_client"
 require "googlebooks"
-require 'config'
 
 
 class MediaItem
@@ -30,13 +28,13 @@ class MediaGrabber
   ANI = :ani
   BOOK = :book
 
-  def initialize
-    Tmdb::Api.key(configatron.tmdb.api_key)
+  def initialize(secrets)
+    Tmdb::Api.key(secrets[:tmdb_api_key])
     config = Tmdb::Configuration.new
-	 @poster_path = config.base_url + config.poster_sizes[3]
-	 @vg_client = IGDB::Client.new configatron.igdb.api_key
-    @anime_client = MyanimelistClient.new(configatron.anime.uname,
-                                          configatron.anime.pass)
+    @poster_path = config.base_url + config.poster_sizes[3]
+    @vg_client = IGDB::Client.new secrets[:igdb_api_key]
+    @anime_client = MyanimelistClient.new(secrets[:anime_uname],
+                                          secrets[:anime_pass])
   end
 
   def get_media_list(name,type)
