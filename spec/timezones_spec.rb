@@ -1,47 +1,75 @@
-require 'bot_helper'
+require_relative '../lib/timezones.rb'
 
-class BotHelper
+class MockBot
 
-  attr_accessor :text
-  attr_reader :receive
-  
-  def initialize()
-    @message = nil
-    @regex = nil
-    @block = nil
-    @event = double('event')
-    @message = double('message')
-    allow(@event).to receive(:message) {@message}
-    allow(@message).to receive(:text) {@text}
+  def initialize
   end
 
-  def message(contains:,&block)
+  def message(contains: nil , &block)
     @regex = contains
-    @block=block
-  end
-  
-  def send_message(channel,message)
-    @message = message
+    @block = block
   end
 
-  def trigger_message(message)
-    @text = message
-    if @regex ~= message
-      @block.call(@event)
-    end
+  def trigger (event)
+    @block.call(event)
   end
 end
 
 describe TimeZones do
-  context "When testing the TimeZones class" do
-    before(:each) do
-      @bot = BotHelper.new()
-      @timezones = TimeZones.new(bot)
-    end
+  let(:event) { double("event",respond: nil) }
+  let(:bot) { MockBot.new }
+  subject { described_class.new(bot,"Asia/Riyadh",{})}
 
-    it "should read HH:MM notation" do
-      @bot.trigger_message "Meet at 12:01 today"
-      expect(@bot.receive).to be_kind_of(String)
-      end
+  it 'responds when message has HH:MM time' do
+    allow(event).to receive(:message).and_return("Lets do something at 12:34")
+    allow(event).to receive(:user).and_return("darkstego")
+    expect(event).to receive(:respond).with(match(/12:34 in Riyadh/))
+    subject
+    bot.trigger(event)
   end
+
+  it 'responds when message has HH:MM time' do
+    allow(event).to receive(:message).and_return("Lets meet at 3:20 pm")
+    allow(event).to receive(:user).and_return("darkstego")
+    expect(event).to receive(:respond).with(match(/15:20 in Riyadh/))
+    subject
+    bot.trigger(event)
+  end
+
+  it 'doesnt respond when no time is mentioned' do
+    allow(event).to receive(:message).and_return("How about a party later")
+    allow(event).to receive(:user).and_return("darkstego")
+    expect(event).to receive(:respond).never
+    subject
+    bot.trigger(event)
+  end
+
+  #private method tests 
+  it 'finds explicit HH:MM times' do
+    expect(subject.send(:find_time_in_message,"how about at 12:30")).to eq(Time.parse "12:30")
+    expect(subject.send(:find_time_in_message,"maybe 3:15 will be good")).to eq(Time.parse "3:15")
+  end
+
+  it 'finds HH:MM AM/PM formatted times' do
+    expect(subject.send(:find_time_in_message,"The game start at 4:30PM")).to eq(Time.parse "4:30 PM")
+    expect(subject.send(:find_time_in_message,"Is 11:19 AM good?")).to eq(Time.parse "11:19 AM")
+    expect(subject.send(:find_time_in_message,"I wanna meet at 3:12 pm")).to eq(Time.parse "3:12 PM")
+
+  end
+
+  it 'find HH AM/PM formatted times' do
+    expect(subject.send(:find_time_in_message,"we meet at 3 pm")).to eq(Time.parse "3:00 PM")
+    expect(subject.send(:find_time_in_message,"it happened at 12am")).to eq(Time.parse "12:00 AM")
+  end
+
+  it 'finds the phrase (at HH)' do
+    expect(subject.send(:find_time_in_message,"why don't we do it at 3")).to eq(Time.parse "3:00 PM")
+    expect(subject.send(:find_time_in_message,"I will be free at 5")).to eq(Time.parse "5:00 PM")  end
+  
+  it 'should not find time in strings without time' do
+    expect(subject.send(:find_time_in_message,"How is the weather?")).to be_nil
+    expect(subject.send(:find_time_in_message,"Did you see ep 3")).to be_nil
+    expect(subject.send(:find_time_in_message,"It cost 500 I think")).to be_nil
+  end
+
 end

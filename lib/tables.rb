@@ -37,7 +37,6 @@ end
 #Email and score needs to be translated before this point
 class Airtable
   Users_File = 'config/airtable_users.yml'
-  Valid_Email = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
   RATINGS = ["Crap","Filet O Fish","Decent", "Must Experience"]
   MEDIA_NAMES = {MediaGrabber::TV => "TV Show",
                  MediaGrabber::MOVIE => "Movie",
