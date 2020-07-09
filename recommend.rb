@@ -12,6 +12,10 @@ require 'recommendation'
 require 'partyannouncer'
 require 'timezones'
 
+settings = File.expand_path("../config/settings.yml", __FILE__)
+sercrets = File.expand_path("../config/secrets.yml", __FILE__)
+Config.load_and_set_settings(settings,secrets)
+puts Settings.names
 
 
 bot = Discordrb::Bot.new token: configatron.token, client_id: configatron.client_id

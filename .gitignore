@@ -1,5 +1,6 @@
 /lib/config.rb
 config.rb
+config/*
 airtable_users.yml
 *~
 \#*\#
