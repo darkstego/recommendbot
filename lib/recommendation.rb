@@ -1,7 +1,6 @@
 # coding: utf-8
 require 'tables'
 require 'mediagrabber'
-require 'recommendboterror'
 
 
 class Recommendations
