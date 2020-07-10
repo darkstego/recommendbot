@@ -15,7 +15,7 @@ class TimeZones
     end
     # respond to each time reported
     bot.message(contains: /\d/) do |event|
-      parse_message(event.message, event.user, event)
+      parse_message(event.message.to_s, event.user, event)
     end
   end
 

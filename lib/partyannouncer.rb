@@ -2,7 +2,7 @@ class PartyAnnouncer
 
   @announce_time = Time.new - (360*60)
   
-  def initalize(bot, voice_channel, announce_channel, backoff)
+  def initialize(bot, voice_channel, announce_channel, backoff)
     bot.voice_state_update(channel: voice_channel) do |event|
       if event.channel.users.size >= 2 and Time.now > @announce_time + backoff
         @announce_time = Time.now
