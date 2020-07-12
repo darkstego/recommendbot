@@ -1,7 +1,6 @@
 require 'yaml'
-require 'mediagrabber'
 require 'airrecord'
-
+require 'mediaitem'
 
 class Media < Airrecord::Table
   self.table_name = "Media"
@@ -33,11 +32,11 @@ end
 class Airtable
   Users_File = 'config/airtable_users.yml'
   RATINGS = ["Crap","Filet O Fish","Decent", "Must Experience"]
-  MEDIA_NAMES = {MediaGrabber::TV => "TV Show",
-                 MediaGrabber::MOVIE => "Movie",
-                 MediaGrabber::VG => "Video Game",
-                 MediaGrabber::ANI => "Anime",
-                 MediaGrabber::BOOK => "Book",} 
+  MEDIA_NAMES = {MediaItem::TV => "TV Show",
+                 MediaItem::MOVIE => "Movie",
+                 MediaItem::VG => "Video Game",
+                 MediaItem::ANI => "Anime",
+                 MediaItem::BOOK => "Book"} 
  
   def initialize(secrets)
     @users = YAML::load_file(Users_File) #Load

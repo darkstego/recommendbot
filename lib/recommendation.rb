@@ -1,7 +1,7 @@
 # coding: utf-8
 require 'tables'
 require 'mediagrabber'
-
+require 'mediaitem'
 
 class Recommendations
   VALID_EMAIL = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
@@ -16,7 +16,7 @@ class Recommendations
     @bot.pm(contains: VALID_EMAIL) { |event| register_email(event)}
 
     # in: "#recommendations"
-    reg = MediaGrabber::MEDIA_TYPES.collect {|x| x.to_s.upcase }.join("|")
+    reg = MediaItem::MEDIA_TYPES.collect {|x| x.to_s.upcase }.join("|")
     @bot.message(start_with: /(#{reg}) /i, in: "#recommendations") do |event|
       begin
         if @db.user_valid? event.user.id
@@ -38,7 +38,7 @@ class Recommendations
     type,title,score,review = m.captures
     
     case(type.downcase.to_sym)
-    when *MediaGrabber::MEDIA_TYPES
+    when *MediaItem::MEDIA_TYPES
       type = type.downcase.to_sym
     else
       raise "Invalid Media Type"
@@ -67,7 +67,7 @@ class Recommendations
           e.respond "Invalid Number for selection"
         else
           t = titles[n-1]
-          add_to_db(e,t,score,review)
+          add_to_db(event,t,score,review)
         end
       end
     elsif titles.size == 1
