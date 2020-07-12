@@ -1,4 +1,4 @@
-require_relative '../lib/timezones.rb'
+require 'timezones.rb'
 
 class MockBot
 
