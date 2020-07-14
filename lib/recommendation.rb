@@ -108,6 +108,7 @@ class Recommendations
     airtable_url = "https://airtable.com/tblLqJXiizSuGdmlT/viwEvsUtWZBnrsetM"
     event.respond item.url.to_s
     event.respond "**#{event.user.name}** *rated this as* **#{@db.get_rating(score)}**\n#{review}\n<#{airtable_url}>"
+    event.message.delete
   end
 
 end
