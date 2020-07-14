@@ -17,20 +17,30 @@ end
 
 describe TimeZones do
   let(:event) { double("event",respond: nil) }
+  let(:user_default) {double("user", id: 1111)}
+  let(:user_custom) {double("custom_user", id: 1234)}
   let(:bot) { MockBot.new }
-  subject { described_class.new(bot,"Asia/Riyadh",{})}
+  subject { described_class.new(bot,"Asia/Riyadh",{"1234": "America/New_York"})}
 
   it 'responds when message has HH:MM time' do
     allow(event).to receive(:message).and_return("Lets do something at 12:34")
-    allow(event).to receive(:user).and_return("darkstego")
+    allow(event).to receive(:user).and_return(user_default)
     expect(event).to receive(:respond).with(match(/12:34 in Riyadh/))
     subject
     bot.trigger(event)
   end
 
-  it 'responds when message has HH:MM time' do
+  it 'handles custom user timezone' do
+    allow(event).to receive(:message).and_return("Lets do something at 12:34")
+    allow(event).to receive(:user).and_return(user_custom)
+    expect(event).to receive(:respond).with(match(/12:34 in New York/))
+    subject
+    bot.trigger(event)
+  end
+
+  it 'responds when message has HH:MM AM/PM time' do
     allow(event).to receive(:message).and_return("Lets meet at 3:20 pm")
-    allow(event).to receive(:user).and_return("darkstego")
+    allow(event).to receive(:user).and_return(user_default)
     expect(event).to receive(:respond).with(match(/15:20 in Riyadh/))
     subject
     bot.trigger(event)
@@ -38,7 +48,7 @@ describe TimeZones do
 
   it 'doesnt respond when no time is mentioned' do
     allow(event).to receive(:message).and_return("How about a party later")
-    allow(event).to receive(:user).and_return("darkstego")
+    allow(event).to receive(:user).and_return(user_default)
     expect(event).to receive(:respond).never
     subject
     bot.trigger(event)

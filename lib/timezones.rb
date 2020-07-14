@@ -8,14 +8,14 @@ class TimeZones
   def initialize(bot,default_timezone,user_timezones)
     begin
       @default_timezone = TZInfo::Timezone.get(default_timezone)
-      @user_timezones = user_timezones
+      @user_timezones = Hash[user_timezones.map {|key,tz| [key,TZInfo::Timezone.get(tz)] }]
     rescue TZInfo::InvalidTimezoneIdentifier
       # ReportError
       # Don't Load rest
     end
     # respond to each time reported
     bot.message(contains: /\d/) do |event|
-      parse_message(event.message.to_s, event.user, event)
+      parse_message(event.message.to_s, event.user.id, event)
     end
   end
 
@@ -30,7 +30,7 @@ class TimeZones
       response = "#{time.strftime(TIME_FORMAT)} in #{tz.friendly_identifier(true)} is "
       other_tzs.each do |user_tz|
         user_time = user_tz.to_local(time)
-        reponse += "#{user_time.strftime(TIME_FORMAT)} in #{user_tz.friendly_identifier(true)}, "
+        response += "#{user_time.strftime(TIME_FORMAT)} in #{user_tz.friendly_identifier(true)}, "
       end
       random_tz = find_random_timezone
       random_time = random_tz.to_local(time)
@@ -52,6 +52,7 @@ class TimeZones
   end
 
   def user_timezone(user)
+    user = user.to_s.to_sym
     @user_timezones.has_key?(user) ? @user_timezones[user] : @default_timezone
   end
 

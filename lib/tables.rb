@@ -45,18 +45,18 @@ class Airtable
     Review.base_key = secrets[:airtable_app_key]
   end
   
-  def add(item,user_id,score,review)
+  def add(item,user_id,score,review_text)
     email = @users[user_id]
     raise "Can't find your email for Airtable" unless email
     media = Media.make({"Title"=>item.title,
                         "url"=>item.url,
                         "Blurb"=>item.blurb,
                         "Type of Medium" => MEDIA_NAMES[item.type],
-                       "Attachments"=>[{"url"=>item.image}]})
-    review = Review.new( "Review" => review,
+                        "Attachments"=>[{"url"=>item.image}]})
+    review = Review.new( {"Review" => review_text,
                          "Rating" => get_rating(score),
-                         "Media" => media,
-                         "Author" => {"email" => email})
+                         "Media" => [media.id],
+                         "Author" => {"email" => email}})
     review.create
   end
 
