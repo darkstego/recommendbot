@@ -54,6 +54,14 @@ describe TimeZones do
     bot.trigger(event)
   end
 
+  it 'doesnt respond when talking about percentages' do
+    allow(event).to receive(:message).and_return("Progress at 33%")
+    allow(event).to receive(:user).and_return(user_default)
+    expect(event).to receive(:respond).never
+    subject
+    bot.trigger(event)
+  end
+
   #private method tests 
   it 'finds explicit HH:MM times' do
     expect(subject.send(:find_time_in_message,"how about at 12:30")).to eq(Time.parse "12:30")
