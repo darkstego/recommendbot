@@ -46,6 +46,14 @@ describe TimeZones do
     bot.trigger(event)
   end
 
+   it 'responds when message has at HH' do
+    allow(event).to receive(:message).and_return("Lets meet at 3")
+    allow(event).to receive(:user).and_return(user_default)
+    expect(event).to receive(:respond).with(match(/15:00 in Riyadh/))
+    subject
+    bot.trigger(event)
+  end
+
   it 'doesnt respond when no time is mentioned' do
     allow(event).to receive(:message).and_return("How about a party later")
     allow(event).to receive(:user).and_return(user_default)
