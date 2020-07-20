@@ -66,7 +66,7 @@ class TimeZones
     regex_array = [/(1[0-2]|0?[1-9]):([0-5]?[0-9])(\s?[AP]M)/i,
                    /(2[0-3]|[01]?[0-9]):([0-5]?[0-9])/,
                    /(1[0-2]|[1-9])\s?[AP]M/i,
-                  /at\s{0,2}(1[0-2]|[1-9])(?:\s|$)/i]
+                  /at\s{0,2}(1[0-2]|[1-9])(?:$|[.,\s])/i]
     regex = regex_array.find { |reg| text[reg]}
     if regex
       time = regex == regex_array.last ? text[regex,1] + " PM" : text[regex]

@@ -52,6 +52,22 @@ describe TimeZones do
     expect(event).to receive(:respond).with(match(/15:00 in Riyadh/))
     subject
     bot.trigger(event)
+   end
+
+   it 'responds when message has at HH, then more text' do
+    allow(event).to receive(:message).and_return("Lets meet at 3, then decide")
+    allow(event).to receive(:user).and_return(user_default)
+    expect(event).to receive(:respond).with(match(/15:00 in Riyadh/))
+    subject
+    bot.trigger(event)
+   end
+
+   it 'responds when message has at HH then space and more text' do
+    allow(event).to receive(:message).and_return("Lets meet at 3 then decide")
+    allow(event).to receive(:user).and_return(user_default)
+    expect(event).to receive(:respond).with(match(/15:00 in Riyadh/))
+    subject
+    bot.trigger(event)
   end
 
   it 'doesnt respond when no time is mentioned' do
@@ -63,7 +79,7 @@ describe TimeZones do
   end
 
   it 'doesnt respond when talking about percentages' do
-    allow(event).to receive(:message).and_return("Progress at 33%")
+    allow(event).to receive(:message).and_return("Progress at 12%")
     allow(event).to receive(:user).and_return(user_default)
     expect(event).to receive(:respond).never
     subject
