@@ -106,7 +106,8 @@ describe TimeZones do
 
   it 'finds the phrase (at HH)' do
     expect(subject.send(:find_time_in_message,"why don't we do it at 3")).to eq(Time.parse "3:00 PM")
-    expect(subject.send(:find_time_in_message,"I will be free at 5")).to eq(Time.parse "5:00 PM")  end
+    expect(subject.send(:find_time_in_message,"I will be free at 5")).to eq(Time.parse "5:00 PM")
+  end
   
   it 'should not find time in strings without time' do
     expect(subject.send(:find_time_in_message,"How is the weather?")).to be_nil
