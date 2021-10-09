@@ -54,10 +54,26 @@ describe TimeZones do
     bot.trigger(event)
    end
 
+   it 'responds when message has around HH' do
+    allow(event).to receive(:message).and_return("I can do tonight.. Around 9")
+    allow(event).to receive(:user).and_return(user_default)
+    expect(event).to receive(:respond).with(match(/21:00 in Riyadh/))
+    subject
+    bot.trigger(event)
+   end
+
    it 'responds when message has at HH, then more text' do
     allow(event).to receive(:message).and_return("Lets meet at 3, then decide")
     allow(event).to receive(:user).and_return(user_default)
     expect(event).to receive(:respond).with(match(/15:00 in Riyadh/))
+    subject
+    bot.trigger(event)
+   end
+
+   it 'responds when message has by HH' do
+    allow(event).to receive(:message).and_return("I'll be free by 930 I assume")
+    allow(event).to receive(:user).and_return(user_default)
+    expect(event).to receive(:respond).with(match(/21:30 in Riyadh/))
     subject
     bot.trigger(event)
    end
@@ -89,7 +105,7 @@ describe TimeZones do
   #private method tests 
   it 'finds explicit HH:MM times' do
     expect(subject.send(:find_time_in_message,"how about at 12:30")).to eq(Time.parse "12:30")
-    expect(subject.send(:find_time_in_message,"maybe 3:15 will be good")).to eq(Time.parse "3:15")
+    expect(subject.send(:find_time_in_message,"maybe 3:15 will be good")).to eq(Time.parse "3:15 pm")
   end
 
   it 'finds HH:MM AM/PM formatted times' do

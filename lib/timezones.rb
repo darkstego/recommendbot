@@ -63,14 +63,20 @@ class TimeZones
   # If only single number given assume they mean PM
   # Returns nil if not time found
   def find_time_in_message(text)
-    regex_array = [/(1[0-2]|0?[1-9]):([0-5]?[0-9])(\s?[AP]M)/i,
+    regex_array = [/(1[0-2]|0?[1-9]):?([0-5]?[0-9])?(\s?[AP]M)/i,
                    /(2[0-3]|[01]?[0-9]):([0-5]?[0-9])/,
-                   /(1[0-2]|[1-9])\s?[AP]M/i,
-                  /at\s{0,2}(1[0-2]|[1-9])(?:$|[.,\s])/i]
+                   /((?<=at)|(?<=by)|(?<=around))\s?(1[0-2]|[1-9])([0-5][0-9])?(?=$|[.,\s])/i]
     regex = regex_array.find { |reg| text[reg]}
     if regex
-      time = regex == regex_array.last ? text[regex,1] + " PM" : text[regex]
-      Time.parse time
+      time = text[regex]
+      Time.parse format_time(time)
     end
+  end
+
+  def format_time(text)
+    result = text
+    result = result.sub(/(\d{1,2})(\d{2})/,'\1:\2') if text[/\d{3,4}/]
+    result = result + "pm" if !(text[/[AP]M/i] || text[/^(2[0-3]|1[3-9])/]) 
+    return result
   end
 end
