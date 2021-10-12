@@ -28,6 +28,7 @@ class Recommendations
         event.respond error.message
       end
     end
+    register_commands
   end
 
   private
@@ -111,4 +112,14 @@ class Recommendations
     event.message.delete
   end
 
+  def register_commands()
+    raise 'No Enviromental Variable' unless ENV['SLASH_COMMAND_BOT_SERVER_ID']
+    @bot.register_application_command(:recommend, 'Recommendation commands',
+                                      server_id: ENV['SLASH_COMMAND_BOT_SERVER_ID']) do |cmd|
+      cmd.subcommand(:email, 'Register Airtable Email') do |sub|
+        sub.string(:email_addr, 'Your Email Address', required: true)
+      end
+    end
+  end
+  
 end
