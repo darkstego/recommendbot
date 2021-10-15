@@ -45,6 +45,7 @@ class Recommendations
     @bot.application_command(:recommend).subcommand(:review) do |event|
       begin
         if @db.user_valid? event.user.id
+          event.defer
           parse_add_media(event)
         else
           event.respond(content: "I don't have your airtable email. Please Register your email",
@@ -56,6 +57,7 @@ class Recommendations
     end
     
     @bot.application_command(:recommend).subcommand(:register) do |event|
+      event.defer
       register_email(event)
     end
   end
@@ -84,7 +86,7 @@ class Recommendations
       end
       response = "Pick Number of Title you are looking for, or 0 to cancel\n"
       response += r.join("\n")
-      event.respond(content: response, ephemeral: true)
+      event.edit_response(content: response)
       event.channel.await(author: event.user,contains: /^(\d+)/) do |e|
         n = e.message.text.match(/(\d+)/).captures.first.to_i
         if n.zero?
@@ -102,10 +104,9 @@ class Recommendations
     elsif titles.size == 1
       t = titles[0]
       add_to_db(event,t,score,review)
-      event.respond(content: "Done", ephemeral: true)
+      event.edit_response(content: "Done")
     else
-      event.respond(content: "Couldn't find any titles with that name 😾",
-                    ephemeral: true)
+      event.edit_response(content: "Couldn't find any titles with that name 😾")
     end
   end
 
@@ -113,9 +114,9 @@ class Recommendations
     begin
       if VALID_EMAIL.match?(event.options['email'])
         @db.add_user(event.user.id,event.options['email'])
-        event.respond(content: "Email registered")
+        event.edit_response(content: "Email registered")
       else
-        event.respond(content: "#{event.options['email']} not a valid email",
+        event.edit_response(content: "#{event.options['email']} not a valid email",
                       ephemeral: true)
       end
     rescue => error
