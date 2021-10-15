@@ -10,19 +10,35 @@ require 'recommendation'
 require 'partyannouncer'
 require 'timezones'
 require 'goodbot'
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+  opts.on("-r NUM", "--register=NUM", "Register Slash Commands on server") do |n|
+    options[:register_server] = n
+  end
+  opts.on("-d NUM", "--deregister=NUM", "Unregister Slash Commands on server") do |n|
+    options[:unregister_server] = n
+  end
+end.parse!
 
 settings_file = File.expand_path("../config/settings.yml", __FILE__)
 secrets_file = File.expand_path("../config/secrets.yml", __FILE__)
 Config.load_and_set_settings(settings_file,secrets_file)
 secrets = Settings.secrets.to_h
 
-bot = Discordrb::Bot.new(token: secrets[:discord_token], client_id: secrets[:discord_client_id])
+bot = Discordrb::Bot.new(token: secrets[:discord_token],intents: [:server_messages])
 
-bot.mention do |event|
-  event.user.pm('You have mentioned me!')
+if options[:register_server]
+  Recommendations.register_commands(bot, options[:register_server])
+  exit
+elsif options [:unregister_server]
+  Recommendations.unregister_commands(bot, options[:unregister_server])
+  exit
 end
 
-Recommendations.new(bot,secrets).start
+
+Recommendations.new(bot,secrets)
 PartyAnnouncer.new(bot,
                    Settings.party_voice_channel,
                    Settings.party_announce_channel,

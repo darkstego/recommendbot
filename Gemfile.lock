@@ -1,3 +1,16 @@
+GIT
+  remote: https://github.com/shardlab/discordrb.git
+  revision: 3ee410a992a795c6879247de79d8b4d1f0a870ec
+  specs:
+    discordrb (3.4.2)
+      discordrb-webhooks (~> 3.4.2)
+      ffi (>= 1.9.24)
+      opus-ruby
+      rest-client (>= 2.0.0)
+      websocket-client-simple (>= 0.3.0)
+    discordrb-webhooks (3.4.2)
+      rest-client (>= 2.0.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -12,14 +25,6 @@ GEM
     connection_pool (2.2.5)
     deep_merge (1.2.1)
     diff-lcs (1.4.4)
-    discordrb (3.4.0)
-      discordrb-webhooks (~> 3.3.0)
-      ffi (>= 1.9.24)
-      opus-ruby
-      rest-client (>= 2.0.0)
-      websocket-client-simple (>= 0.3.0)
-    discordrb-webhooks (3.3.0)
-      rest-client (>= 2.1.0.rc1)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
     dry-configurable (0.13.0)
@@ -143,7 +148,7 @@ PLATFORMS
 DEPENDENCIES
   airrecord
   config
-  discordrb
+  discordrb (= 3.4.2)!
   googlebooks
   igdb_client
   myanimelist_client

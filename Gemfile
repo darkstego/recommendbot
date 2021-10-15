@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-gem 'discordrb'
+gem 'discordrb', '3.4.2',git: 'https://github.com/shardlab/discordrb.git'
 gem 'airrecord'
 gem 'themoviedb'
 gem 'igdb_client'
