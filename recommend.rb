@@ -27,7 +27,7 @@ secrets_file = File.expand_path("../config/secrets.yml", __FILE__)
 Config.load_and_set_settings(settings_file,secrets_file)
 secrets = Settings.secrets.to_h
 
-bot = Discordrb::Bot.new(token: secrets[:discord_token],intents: [:server_messages])
+bot = Discordrb::Bot.new(token: secrets[:discord_token],intents: [:server_messages,:servers])
 
 if options[:register_server]
   Recommendations.register_commands(bot, options[:register_server])
