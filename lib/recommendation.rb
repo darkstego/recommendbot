@@ -16,11 +16,11 @@ class Recommendations
                              'Video Game' => 'vg',
                             'Book' => 'book'})
         sub.string('title', 'Title', required: true)
-        sub.integer('score', 'Score', required: true,
-                    choices: {'Must Experience': 4,
-                              'Decent': 3,
-                              'Filet-O-Fish': 2,
-                              'Crap': 1})
+        sub.string('score', 'Score', required: true,
+                    choices: {'Must Experience': 4.to_s,
+                              'Decent': 3.to_s,
+                              'Filet-O-Fish': 2.to_s,
+                              'Crap': 1.to_s})
         sub.string('review', 'Review', required: true)
       end
 
@@ -98,8 +98,7 @@ class Recommendations
           t = titles[n-1]
           add_to_db(event,t,score,review)
         end
-        #TODO: check permissions before deleting
-        e.message.delete 
+        e.message.delete if @bot.bot_user.on(e.server).can_manage_messages?(e.channel)
       end
     elsif titles.size == 1
       t = titles[0]
