@@ -116,12 +116,11 @@ class Recommendations
         @db.add_user(event.user.id,event.options['email'])
         event.edit_response(content: "Email registered")
       else
-        event.edit_response(content: "#{event.options['email']} not a valid email",
-                      ephemeral: true)
+        event.edit_response(content: "#{event.options['email']} not a valid email")
       end
     rescue => error
       event.channel.send_message(content:"Couldn't add your email #{event.options[:email]}",
-                    ephemeral: true)
+                                 ephemeral: true)
     end
   end
   
