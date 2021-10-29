@@ -61,6 +61,11 @@ describe TimeZones do
       is_expected.to receive(:respond).with(match(/15:00 in Riyadh/))
     end
 
+    it 'handles HHish' do
+      allow(event).to receive(:message).and_return("Hopefully be free in an hour, so 9ish")
+      is_expected.to receive(:respond).with(match(/21:00 in Riyadh/))
+    end
+
     it 'does not respond when no time is mentioned' do
       allow(event).to receive(:message).and_return("How about a party later")
       is_expected.to receive(:respond).never
