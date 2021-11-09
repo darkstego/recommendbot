@@ -24,6 +24,15 @@ class Recommendations
         sub.string('review', 'Review', required: true)
       end
 
+      cmd.subcommand(:mention, 'Show a Link to Media') do |sub|
+        sub.string('type', 'Media Type', required: true,
+                   choices: {'Movie' => 'mov',
+                             'TV Series' => 'tv',
+                             'Video Game' => 'vg',
+                            'Book' => 'book'})
+        sub.string('title', 'Title', required: true)
+      end
+
       cmd.subcommand(:register, 'Register Airtable Email') do |sub|
         sub.string('email', 'Your Email Address', required: true)
       end
@@ -46,7 +55,11 @@ class Recommendations
       begin
         if @db.user_valid? event.user.id
           event.defer
-          parse_add_media(event)
+          review_media(event,
+                       event.options['type'].to_sym,
+                       event.options['title'],
+                       event.options['score'].to_i,
+                       event.optiosn['review'])
         else
           event.respond(content: "I don't have your airtable email. Please Register your email",
                         ephemeral: true)
@@ -55,6 +68,14 @@ class Recommendations
         event.channel.send_message error.message
       end
     end
+
+    @bot.application_command(:recommend).subcommand(:mention) do |event|
+      event.defer
+      mention_media(event,
+                    event.options['type'].to_sym,
+                    event.options['title'])
+    end
+
     
     @bot.application_command(:recommend).subcommand(:register) do |event|
       event.defer
@@ -63,23 +84,13 @@ class Recommendations
   end
 
   private
-  # TV "The Expanse" 5 "Great Show"
-  def parse_add_media(event)
-    case(event.options['type'].downcase.to_sym)
-    when *MediaItem::MEDIA_TYPES
-      type = event.options['type'].downcase.to_sym
-    else
-      raise "Invalid Media Type"
-    end
-    score = event.options['score'].to_i
-    raise "Invalid Score" if score > 4 or score < 1
-    
-    add_media(event,type,event.options['title'],score,event.options['review'])
-  end
 
-  def add_media(event,type,title,score,review)
+  def get_media(event, type, title)
     titles = @grabber.get_media_list(title,type)
-    raise "couldn't find the title you were looking for" unless titles
+    if !titles
+      event.edit_response(content: "Couldn't find that title")
+      return
+    end
     if titles.size > 1
       r = titles.each_with_index.map do |media,index|
         (index+1).to_s + ") #{media.display ? media.display : media.title}"
@@ -87,7 +98,7 @@ class Recommendations
       response = "Pick Number of Title you are looking for, or 0 to cancel\n"
       response += r.join("\n")
       event.edit_response(content: response)
-      event.channel.await(author: event.user,contains: /^(\d+)/) do |e|
+      event.channel.await!(timeout: 15, author: event.user,contains: /^(\d+)/) do |e|
         n = e.message.text.match(/(\d+)/).captures.first.to_i
         if n.zero?
           event.send_message(content: "Cancelled", ephemeral: true)
@@ -96,17 +107,25 @@ class Recommendations
                         ephemeral: true)
         else
           t = titles[n-1]
-          add_to_db(event,t,score,review)
+          yield t
         end
         e.message.delete if @bot.bot_user.on(e.server).can_manage_messages?(e.channel)
       end
     elsif titles.size == 1
       t = titles[0]
-      add_to_db(event,t,score,review)
+      yield t
       event.edit_response(content: "Done")
-    else
-      event.edit_response(content: "Couldn't find any titles with that name 😾")
     end
+    event.edit_response(content: "Couldn't find any titles with that name 😾")
+  end
+
+  # Add a link 
+  def mention_media(event, type, title)
+   get_media(event, type, title) { |m| event.channel.send_message m.url.to_s}
+  end
+  
+  def review_media(event,type,title,score,review)
+    get_media(event, type, title) { |m| add_to_db(event,m,score,review)}
   end
 
   def register_email(event)
@@ -130,7 +149,6 @@ class Recommendations
     channel ||= event.channel
     channel.send_message item.url.to_s
     channel.send_message "**#{event.user.name}** *rated this as* **#{@db.get_rating(score)}**\n#{review}"
-    # event.delete_response
   end
   
 end
