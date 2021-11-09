@@ -4,7 +4,6 @@ require 'mediagrabber'
 require 'mediaitem'
 
 class Recommendations
-  VALID_EMAIL = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
 
   def self.register_commands(bot,server_id)
     bot.register_application_command(:recommend, 'Recommendation commands',
@@ -59,7 +58,7 @@ class Recommendations
                        event.options['type'].to_sym,
                        event.options['title'],
                        event.options['score'].to_i,
-                       event.optiosn['review'])
+                       event.options['review'])
         else
           event.respond(content: "I don't have your airtable email. Please Register your email",
                         ephemeral: true)
@@ -98,7 +97,7 @@ class Recommendations
       response = "Pick Number of Title you are looking for, or 0 to cancel\n"
       response += r.join("\n")
       event.edit_response(content: response)
-      event.channel.await!(timeout: 15, author: event.user,contains: /^(\d+)/) do |e|
+      event.channel.await!(timeout: 10, author: event.user,contains: /^(\d+)/) do |e|
         n = e.message.text.match(/(\d+)/).captures.first.to_i
         if n.zero?
           event.send_message(content: "Cancelled", ephemeral: true)
@@ -110,13 +109,13 @@ class Recommendations
           yield t
         end
         e.message.delete if @bot.bot_user.on(e.server).can_manage_messages?(e.channel)
+        true
       end
     elsif titles.size == 1
       t = titles[0]
       yield t
-      event.edit_response(content: "Done")
     end
-    event.edit_response(content: "Couldn't find any titles with that name 😾")
+    event.edit_response(content: "Done")
   end
 
   # Add a link 
@@ -125,12 +124,14 @@ class Recommendations
   end
   
   def review_media(event,type,title,score,review)
-    get_media(event, type, title) { |m| add_to_db(event,m,score,review)}
+    get_media(event, type, title) { |m| add_to_db(event,m,score,review) }
   end
 
   def register_email(event)
+    valid_email = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
+
     begin
-      if VALID_EMAIL.match?(event.options['email'])
+      if valid_email.match?(event.options['email'])
         @db.add_user(event.user.id,event.options['email'])
         event.edit_response(content: "Email registered")
       else
