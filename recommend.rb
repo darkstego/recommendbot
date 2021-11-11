@@ -1,6 +1,7 @@
 # coding: utf-8
 # This is an advanced recommendation bot.... for recommendations
 $:.unshift File.expand_path("../lib", __FILE__)
+$:.unshift File.expand_path("../lib/mediagrabbers", __FILE__)
 
 require 'rubygems'
 require 'bundler/setup'
@@ -38,7 +39,7 @@ elsif options [:unregister_server]
 end
 
 
-Recommendations.new(bot,secrets)
+Recommendations.new(bot)
 PartyAnnouncer.new(bot,
                    Settings.party_voice_channel,
                    Settings.party_announce_channel,

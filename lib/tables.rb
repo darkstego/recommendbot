@@ -32,14 +32,15 @@ end
 class Airtable
   Users_File = 'config/airtable_users.yml'
   RATINGS = ["Crap","Filet O Fish","Decent", "Must Experience"]
-  MEDIA_NAMES = {MediaItem::TV => "TV Show",
-                 MediaItem::MOVIE => "Movie",
-                 MediaItem::VG => "Video Game",
-                 MediaItem::ANI => "Anime",
-                 MediaItem::BOOK => "Book"} 
+  MEDIA_NAMES = { tv: "TV Show",
+                 mov: "Movie",
+                 vg: "Video Game",
+                 ani: "Anime",
+                 book: "Book"} 
  
-  def initialize(secrets)
+  def initialize()
     @users = YAML::load_file(Users_File) #Load
+    secrets = Settings.secrets.to_h
     Airrecord.api_key = secrets[:airtable_api_key]
     Media.base_key = secrets[:airtable_app_key]
     Review.base_key = secrets[:airtable_app_key]

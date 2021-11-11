@@ -1,34 +1,31 @@
 # coding: utf-8
 require 'tables'
-require 'mediagrabber'
-require 'mediaitem'
+require 'listfactory'
 
 class Recommendations
+  SEARCH_LIMIT = 5
 
   def self.register_commands(bot,server_id)
+    media_choices = Hash[ListFactory::MEDIA_TYPES.map{|k,v| [v,k.to_s]}]
     bot.register_application_command(:recommend, 'Recommendation commands',
                                      server_id: server_id) do |cmd|
       cmd.subcommand(:review, 'Post a Review') do |sub|
         sub.string('type', 'Media Type', required: true,
-                   choices: {'Movie' => 'mov',
-                             'TV Series' => 'tv',
-                             'Video Game' => 'vg',
-                            'Book' => 'book'})
+                   choices: media_choices)
         sub.string('title', 'Title', required: true)
+        # Choices are string not int because it was causing issues
+        # with selecting them on Discord mobile app
         sub.string('score', 'Score', required: true,
-                    choices: {'Must Experience': 4.to_s,
-                              'Decent': 3.to_s,
-                              'Filet-O-Fish': 2.to_s,
-                              'Crap': 1.to_s})
+                    choices: {'Must Experience': '4',
+                              'Decent': '3',
+                              'Filet-O-Fish': '2',
+                              'Crap': '1'})
         sub.string('review', 'Review', required: true)
       end
 
       cmd.subcommand(:mention, 'Show a Link to Media') do |sub|
         sub.string('type', 'Media Type', required: true,
-                   choices: {'Movie' => 'mov',
-                             'TV Series' => 'tv',
-                             'Video Game' => 'vg',
-                            'Book' => 'book'})
+                   choices: media_choices)
         sub.string('title', 'Title', required: true)
       end
 
@@ -38,18 +35,15 @@ class Recommendations
     end
   end
 
-  
   def self.unregister_commands(bot,server_id)
     ## Requires command_id and no clue how to obtain that
     # bot.delete_application_command(:recommend,
     #                                server_id: server_id) 
   end
   
-  def initialize(bot,secrets)
-    @db = Airtable.new(secrets)
-    @grabber = MediaGrabber.new(secrets)
+  def initialize(bot)
+    @db = Airtable.new
     @bot = bot
-    
     @bot.application_command(:recommend).subcommand(:review) do |event|
       begin
         if @db.user_valid? event.user.id
@@ -75,7 +69,6 @@ class Recommendations
                     event.options['title'])
     end
 
-    
     @bot.application_command(:recommend).subcommand(:register) do |event|
       event.defer
       register_email(event)
@@ -85,7 +78,7 @@ class Recommendations
   private
 
   def get_media(event, type, title)
-    titles = @grabber.get_media_list(title,type)
+    titles = ListFactory.get_media_list(type, title, SEARCH_LIMIT)
     if !titles
       event.edit_response(content: "Couldn't find that title")
       return
