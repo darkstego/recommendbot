@@ -142,7 +142,9 @@ class Recommendations
     channel = event.server.text_channels.find {|c| c.name == 'recommendations'}
     channel ||= event.channel
     channel.send_message item.url.to_s
-    channel.send_message "**#{event.user.name}** *rated this as* **#{@db.get_rating(score)}**\n#{review}"
+    channel.send_message ":pencil:**#{event.user.name}** *rated this as* "\
+                         "**#{@db.get_rating(score)}** #{":star:"*score.to_i}\n"\
+                         ":small_blue_diamond:#{review}:small_blue_diamond:"
   end
   
 end
