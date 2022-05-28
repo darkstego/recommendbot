@@ -79,7 +79,7 @@ class Recommendations
 
   def get_media(event, type, title)
     titles = ListFactory.get_media_list(type, title, SEARCH_LIMIT)
-    if !titles
+    if !titles || titles.size < 1
       event.edit_response(content: "Couldn't find that title")
       return
     end
