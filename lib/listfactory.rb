@@ -16,9 +16,9 @@ class ListFactory
     raise "Media Type [#{type}] is not valid" unless MEDIA_TYPES.has_key?(type)
     case type
     when :mov, :tv
-      TMDBGrabber.new(type)
+      @show_grabber ||= TMDBGrabber.new(type)
     when :vg
-      IGDBGrabber.new(type)
+      @vg_grabber ||= IGDBGrabber.new(type)
     end
   end
 end

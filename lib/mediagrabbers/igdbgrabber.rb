@@ -4,7 +4,7 @@ require 'igdb_client'
 class IGDBGrabber < MediaGrabber
   def initialize(type)
     super(type)
-    @client = IGDB::Client.new(@secrets[:igdb_client_id], @secrets[:igdb_access_token])
+    @client = IGDB::Client.new(@secrets[:igdb_client_id], @secrets[:igdb_client_secret])
   end
 
   def get_list(title, limit)
