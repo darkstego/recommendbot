@@ -15,8 +15,10 @@ class ListFactory
   def self.get_media_grabber(type)
     raise "Media Type [#{type}] is not valid" unless MEDIA_TYPES.has_key?(type)
     case type
-    when :mov, :tv
-      @show_grabber ||= TMDBGrabber.new(type)
+    when :mov
+      @mov_grabber ||= TMDBGrabber.new(type)
+    when :tv
+      @tv_grabber ||= TMDBGrabber.new(type)
     when :vg
       @vg_grabber ||= IGDBGrabber.new(type)
     end
