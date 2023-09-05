@@ -2,6 +2,7 @@ require 'mediagrabber'
 require 'themoviedb'
 
 class TMDBGrabber < MediaGrabber
+  BASE_URL = "https://www.themoviedb.org/"
 
   def initialize(type)
     super(type)
@@ -20,15 +21,11 @@ class TMDBGrabber < MediaGrabber
   end
 
   private
-  def imdb_url_create(id)
-    "http://www.imdb.com/title/#{id.to_s}/"
-  end
-
   def get_tv_list(name, limit)
     list = Tmdb::TV.find(name)
     list = list.first(limit)
     list.map do |x|
-      url = imdb_url_create(Tmdb::TV.external_ids(x.id)["imdb_id"])
+      url = BASE_URL + "tv/" + x.id.to_s
       image = @poster_path + x.poster_path.to_s
       blurb = x.overview.to_s
       year = x.first_air_date[0..3]
@@ -41,7 +38,7 @@ class TMDBGrabber < MediaGrabber
     list = Tmdb::Movie.find(name)
     list = list.first(limit)
     list.map do |x|
-      url = imdb_url_create(Tmdb::Movie.detail(x.id)["imdb_id"])
+      url = BASE_URL + "movie/" + x.id.to_s
       image = @poster_path + x.poster_path.to_s
       blurb = x.overview
       year = x.release_date[0..3]
