@@ -136,15 +136,21 @@ class Recommendations
     end
   end
   
-  # call to add info to Airtable 
+  # call to add info to Airtable AND print the review to correct channel
   def add_to_db(event,item,score,review)
     @db.add(item,event.user.id,score,review)
     channel = event.server.text_channels.find {|c| c.name == 'recommendations'}
     channel ||= event.channel
     channel.send_message item.url.to_s
-    channel.send_message ":pencil:**#{event.user.name}** *rated this as* "\
+    channel.send_message ":pencil:**#{get_author_nick(event)}** *rated this as* "\
                          "**#{@db.get_rating(score)}** #{":star:"*score.to_i}\n"\
                          ":small_blue_diamond:#{review}:small_blue_diamond:"
+  end
+
+  # Get best username to display
+  def get_author_nick(event)
+    member = event.user.on(event.server)
+    return member.nick || event.user.name
   end
   
 end
