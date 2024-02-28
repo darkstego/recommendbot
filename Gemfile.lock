@@ -1,4 +1,10 @@
 GIT
+  remote: https://github.com/darkstego/igdb_client.git
+  revision: 493f494248a10dbb0bb0e4338cbd0356bfb3f110
+  specs:
+    igdb_client (5.0.1)
+
+GIT
   remote: https://github.com/shardlab/discordrb.git
   revision: 3ee410a992a795c6879247de79d8b4d1f0a870ec
   specs:
@@ -88,13 +94,12 @@ GEM
     httparty (0.21.0)
       mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
-    igdb_client (4.0.0)
     method_source (1.0.0)
     mime-types (3.4.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2022.0105)
     mini_mime (1.1.2)
-    mini_portile2 (2.8.1)
+    mini_portile2 (2.8.5)
     multi_xml (0.6.0)
     multipart-post (2.1.1)
     myanimelist_client (0.1.1)
@@ -103,15 +108,15 @@ GEM
     net-http-persistent (4.0.1)
       connection_pool (~> 2.2)
     netrc (0.11.0)
-    nokogiri (1.14.3)
-      mini_portile2 (~> 2.8.0)
+    nokogiri (1.16.2)
+      mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     opus-ruby (1.0.1)
       ffi
     pry (0.14.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    racc (1.6.2)
+    racc (1.7.3)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -151,7 +156,7 @@ DEPENDENCIES
   config
   discordrb (= 3.4.2)!
   googlebooks
-  igdb_client
+  igdb_client!
   myanimelist_client
   pry
   rspec
