@@ -131,7 +131,7 @@ class Recommendations
         event.edit_response(content: "#{event.options['email']} not a valid email")
       end
     rescue => error
-      event.channel.send_message(content:"Couldn't add your email #{event.options[:email]}",
+      event.channel.send_message(content:"Couldn't add your email #{event.options['email']}",
                                  ephemeral: true)
     end
   end

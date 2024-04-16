@@ -63,7 +63,6 @@ class Airtable
 
 
   def add_user(id,email)
-    raise "Email imporperly formatted" unless Valid_Email.match(email)
     @users[id] = email.downcase
     File.open(Users_File, 'w') {|f| f.write @users.to_yaml } #Store
   end
