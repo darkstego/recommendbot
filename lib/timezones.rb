@@ -75,7 +75,7 @@ class TimeZones
   end
 
   def format_time(text)
-    result = text
+    result = text.gsub(".",":")
     result = result.sub(/(\d{1,2})(\d{2})/,'\1:\2') if text[/\d{3,4}/]
     result = result + "pm" if !(text[/[AP]M/i] || text[/^(2[0-3]|1[3-9])/]) 
     return result
