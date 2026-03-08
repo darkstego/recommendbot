@@ -1,0 +1,10 @@
+services:
+  discord-bot:
+    build: .
+    container_name: recommend-bot
+    restart: unless-stopped
+    volumes:
+      - .:/app
+    # Optional: If your bot saves data to a local sqlite db or json file
+    # volumes:
+    #   - ./data:/app/data
